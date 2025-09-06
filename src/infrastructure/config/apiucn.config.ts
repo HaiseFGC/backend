@@ -1,0 +1,1 @@
+export const ApiUcnConfig = "https://puclaro.ucn.cl/eross/avance/";
