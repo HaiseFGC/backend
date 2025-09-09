@@ -1,49 +1,18 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Usuario } from '../domain/entities/usuario.entity';
-import { Carrera } from '../domain/entities/carrera.entity';
-import * as bcrypt from 'bcrypt';
+import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(Usuario)
-    private usuarioRepository: Repository<Usuario>,
-    @InjectRepository(Carrera)
-    private carreraRepository: Repository<Carrera>,
-  ) {}
+  constructor(private readonly http: HttpService) {}
 
   async login(email: string, password: string) {
-    const usuario = await this.usuarioRepository.findOne({
-      where: { email },
-      relations: ['carreras'],
-    });
-
-    if (!usuario || !(await bcrypt.compare(password, usuario.password))) {
-      throw new UnauthorizedException('credenciales incorrectas');
+    const url = `https://puclaro.ucn.cl/eross/avance/login.php?email=${email}&password=${password}`;
+    try {
+      const response = await firstValueFrom(this.http.get(url));
+      return response.data;
+    } catch (error) {
+      return { error: 'Error en login' };
     }
-
-    return {
-      rut: usuario.rut,
-      carreras: usuario.carreras.map((carrera) => ({
-        codigo: carrera.codigo,
-        nombre: carrera.nombre,
-        catalogo: carrera.catalogo,
-      })),
-    };
-  }
-
-  async validateUser(rut: string): Promise<boolean> {
-    const usuario = await this.usuarioRepository.findOne({ where: { rut } });
-    return !!usuario;
-  }
-
-  async testConnection(){
-    const usuario = await this.usuarioRepository.findOne({
-      where: {},
-      relations: ['carreras'],
-    });
-    return usuario || {message: 'No se encontraron usuarios, pero la conexión es exitosa'};
   }
 }

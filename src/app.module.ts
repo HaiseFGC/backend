@@ -4,8 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app/app.controller';
 import { AppService } from './app/app.service';
-import { UcnModule } from './ucn/ucn.module';
 import { EstudianteModule } from './infrastructure/modules/estudiante.module';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 import { Usuario } from './domain/entities/usuario.entity';
 import { Carrera } from './domain/entities/carrera.entity';
 
@@ -13,7 +15,8 @@ import { Carrera } from './domain/entities/carrera.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    HttpModule,
+    AuthModule,
+    EstudianteModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
@@ -22,9 +25,8 @@ import { Carrera } from './domain/entities/carrera.entity';
       password: 'pass',
       database: 'db',
       entities: [Usuario,Carrera],
-      synchronize: true, // Solo para dev
+      synchronize: false, // Solo para dev
     }),
-    UcnModule, // Módulo para integrar los endpoints
   ],
   controllers: [AppController],
   providers: [AppService],
