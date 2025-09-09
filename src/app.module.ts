@@ -1,40 +1,32 @@
 import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Neo4jModule } from 'nest-neo4j';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
+import { AppController } from './app/app.controller';
+import { AppService } from './app/app.service';
+import { UcnModule } from './ucn/ucn.module';
+import { EstudianteModule } from './infrastructure/modules/estudiante.module';
+import { Usuario } from './domain/entities/usuario.entity';
+import { Carrera } from './domain/entities/carrera.entity';
+
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
+    ConfigModule.forRoot(),
+    HttpModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'user',
+      password: 'pass',
+      database: 'db',
+      entities: [Usuario,Carrera],
+      synchronize: true, // Solo para dev
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('POSTGRES_HOST'),
-        port: config.get<number>('POSTGRES_PORT'),
-        username: config.get<string>('POSTGRES_USER'),
-        password: config.get<string>('POSTGRES_PASSWORD'),
-        database: config.get<string>('POSTGRES_DB'),
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
-    }),
-    Neo4jModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        scheme: config.get<string>('NEO4J_SCHEME'),
-        host: config.get<string>('NEO4J_HOST'),
-        port: config.get<number>('NEO4J_PORT'),
-        username: config.get<string>('NEO4J_USER'),
-        password: config.get<string>('NEO4J_PASSWORD'),
-      }),
-    }),
-    AuthModule, // Agregar el módulo de autenticación
-  ]
+    UcnModule, // Módulo para integrar los endpoints
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

@@ -21,4 +21,14 @@ export class AuthController {
     const isValid = await this.authService.validateUser(rut);
     return { valid: isValid };
   }
+
+  @Get('test-connection')
+  async testConnection() {
+    try {
+      const usuario = await this.authService.testConnection();
+      return { status: 'Conexión exitosa', sampleUser: usuario };
+    } catch (error) {
+      return { status: 'Error al conectar', error: error.message };
+    }
+  }
 }

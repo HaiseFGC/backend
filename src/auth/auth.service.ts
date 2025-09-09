@@ -38,4 +38,12 @@ export class AuthService {
     const usuario = await this.usuarioRepository.findOne({ where: { rut } });
     return !!usuario;
   }
+
+  async testConnection(){
+    const usuario = await this.usuarioRepository.findOne({
+      where: {},
+      relations: ['carreras'],
+    });
+    return usuario || {message: 'No se encontraron usuarios, pero la conexión es exitosa'};
+  }
 }
