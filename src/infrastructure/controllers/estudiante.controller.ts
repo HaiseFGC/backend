@@ -4,7 +4,7 @@ import { EstudianteService } from 'src/application/services/estudiante.service';
 @Controller('estudiantes')
 export class EstudianteController {
   constructor(private readonly estudiantesService: EstudianteService) {}
-
+  
   @Get('malla/:codigo/:catalogo')
   async getMalla(
     @Param('codigo') codigo: string,
