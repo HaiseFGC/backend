@@ -1,16 +1,23 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Param, Get } from '@nestjs/common';
 import { EstudianteService } from 'src/application/services/estudiante.service';
 
-@Controller('estudiante')
+@Controller('estudiantes')
 export class EstudianteController {
-    constructor(private readonly estudianteService: EstudianteService) {}
+  constructor(private readonly estudiantesService: EstudianteService) {}
+  
+  @Get('malla/:codigo/:catalogo')
+  async getMalla(
+    @Param('codigo') codigo: string,
+    @Param('catalogo') catalogo: string,
+  ) {
+    return this.estudiantesService.getMalla(codigo, catalogo);
+  }
 
-    @Post('login') // Eliminarlogin de logica de estudiante, ya existe en auth
-    async login(
-        @Body('email') email: string,
-        @Body('password') password: string
-    ) {
-        return this.estudianteService.login(email, password);
-    }
-    
+  @Get('avance/:rut/:carrera')
+  async getAvance(
+    @Param('rut') rut: string,
+    @Param('carrera') carrera: string,
+  ) {
+    return this.estudiantesService.getAvance(rut, carrera);
+  }
 }
