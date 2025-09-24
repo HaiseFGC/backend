@@ -1,16 +1,23 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Param, Get } from '@nestjs/common';
 import { EstudianteService } from 'src/application/services/estudiante.service';
 
-@Controller('estudiante')
+@Controller('estudiantes')
 export class EstudianteController {
-    constructor(private readonly estudianteService: EstudianteService) {}
+  constructor(private readonly estudiantesService: EstudianteService) {}
 
-    @Post('login') // Endpoint para login de estudiante "http://localhost:3000/estudiante/login"
-    async login(
-        @Body('email') email: string,
-        @Body('password') password: string
-    ) {
-        return this.estudianteService.login(email, password);
-    }
-    
+  @Get('malla/:codigo/:catalogo')
+  async getMalla(
+    @Param('codigo') codigo: string,
+    @Param('catalogo') catalogo: string,
+  ) {
+    return this.estudiantesService.getMalla(codigo, catalogo);
+  }
+
+  @Get('avance/:rut/:carrera')
+  async getAvance(
+    @Param('rut') rut: string,
+    @Param('carrera') carrera: string,
+  ) {
+    return this.estudiantesService.getAvance(rut, carrera);
+  }
 }
