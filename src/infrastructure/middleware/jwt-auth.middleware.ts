@@ -6,10 +6,6 @@ import * as jwt from 'jsonwebtoken';
 export class JwtAuthMiddleware implements NestMiddleware {
     use(req: Request, res: Response, next: NextFunction) {
 
-        if (req.path === '/auth/login') {
-            return next();
-        }
-
         const authHeader = req.headers['authorization'];
         if (!authHeader) {
             throw new UnauthorizedException('No token provided');
