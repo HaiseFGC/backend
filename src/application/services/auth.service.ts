@@ -12,8 +12,8 @@ export class AuthService {
     ) {}
 
     async login(email: string, password: string) {
-        const url = `${ApiUcnConfig}/login.php?email=${email}&password=${password}`;
-        console.log(`Authenticating user at URL: ${url}`);
+        const url = `${ApiUcnConfig}login.php?email=${email}&password=${password}`;
+        
 
         try {
             const response = await firstValueFrom(
@@ -32,9 +32,12 @@ export class AuthService {
             const payload = { rut: data.rut };
             const token = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
 
-            return { access_token: token };
+            return { 
+                rut: data.rut,
+                carreras: data.carreras || [],
+                access_token: token };
         } catch (error) {
-            console.error('Login error:', error.response?.data || error.message || error);
+            console.error('ERROR EN EL CATCH');
             throw new UnauthorizedException('Error during authentication');
         }
     }
