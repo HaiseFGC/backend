@@ -9,6 +9,14 @@ export class CreateProyeccionDto {
 
     @IsString()
     @IsNotEmpty()
+    codigoCarrera: string; // Se elige la carrera de la que se desea buscar ramos
+
+    @IsString()
+    @IsNotEmpty()
+    catalogo: string; // Version de la malla
+
+    @IsString()
+    @IsNotEmpty()
     nombre: string;
 
     @IsArray()
