@@ -1,43 +1,47 @@
-// src/infrastructure/controllers/cursos.controller.ts
-
 import { Controller, Post, Body, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import { CursosService } from '../../application/services/cursos.service';
-import { CreateProyeccionRamoDto } from '../../application/dto/create-proyeccion-ramo.dto'; 
-// Asumo que tienes un DTO para la inscripción (cambia el nombre si es diferente)
+import { CreateProyeccionDto } from '../../application/dto/create-proyeccion.dto'; 
 
 @Controller('cursos')
 export class CursosController {
     constructor(private readonly cursosService: CursosService) {}
 
+    // El endpoint ahora recibe el DTO principal que agrupa toda la proyección
     @Post('inscribir')
-    @HttpCode(HttpStatus.CREATED) // Usamos 201 Created para una inscripción exitosa
-    async inscribirRamo(@Body() inscripcionData: CreateProyeccionRamoDto) {
+    @HttpCode(HttpStatus.OK) // Usamos 200 OK ya que no estamos creando la inscripción aquí, solo validando/procesando
+    async inscribirRamo(@Body() proyeccionData: CreateProyeccionDto) {
         
-        // Los datos del DTO deben incluir RUT, CODIGO CARRERA y CODIGO ASIGNATURA
-        const { rut, codigoCarrera, codigoAsignatura } = inscripcionData;
+        const { rut, codigoCarrera, catalogo, ramos } = proyeccionData;
 
-        // 1. Validar los prerrequisitos
-        const esValido = await this.cursosService.validarInscripcion(
-            rut, 
-            codigoCarrera, 
-            codigoAsignatura
-        );
+        // Iterar sobre cada ramo que el estudiante desea inscribir para validarlo
+        for (const ramo of ramos) {
+            const codigoAsignatura = ramo.codigoRamo;
 
-        if (!esValido) {
-            // 2. Si la validación falla, lanzamos una excepción 400 Bad Request
-            throw new BadRequestException(
-                `La inscripción falló: el estudiante con RUT ${rut} no ha APROBADO todos los prerrequisitos para ${codigoAsignatura}.`
+            // 1. Validar los prerrequisitos (llamada al servicio)
+            const esValido = await this.cursosService.validarInscripcion(
+                rut, 
+                codigoCarrera, 
+                catalogo, // Se incluye el catálogo
+                codigoAsignatura
             );
+
+            if (!esValido) {
+                // 2. Si la validación falla para CUALQUIER ramo, se detiene y lanza un error 400
+                throw new BadRequestException(
+                    `Inscripción denegada: El estudiante ${rut} no ha APROBADO todos los prerrequisitos para el ramo ${codigoAsignatura}.`
+                );
+            }
         }
 
-        // 3. Si la validación es exitosa, se puede proceder con la lógica de inscripción
-        // (Llama a otro service/repository para guardar la inscripción en la DB)
-        // Ejemplo:
-        // await this.proyeccionService.crearNuevaInscripcion(inscripcionData);
+        // 3. Si el bucle termina sin lanzar excepciones, todos los ramos son válidos
+        
+        // Aquí iría la lógica final para guardar la proyección o inscribir formalmente los ramos
+        // Por ejemplo:
+        // await this.proyeccionRepository.save(proyeccionData);
 
         return { 
-            message: 'Inscripción exitosa. Prerrequisitos validados y cumplidos.', 
-            data: inscripcionData 
+            message: 'Inscripción exitosa. Todos los prerrequisitos han sido validados y cumplidos.', 
+            data: proyeccionData 
         };
     }
 }
