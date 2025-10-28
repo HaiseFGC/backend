@@ -5,7 +5,7 @@ import { ApiUcnService } from './apiucn.service'; //  Importamos el nuevo servic
 export class CursosService {
     
     // Inyectamos el servicio que maneja la comunicación con APIs externas
-    constructor(private readonly apiUcnService: ApiUcnService) {}
+    constructor(private readonly ApiUcnService: ApiUcnService) {}
 
     /**
      * Valida si un estudiante puede inscribir una asignatura verificando sus prerrequisitos.
@@ -14,7 +14,7 @@ export class CursosService {
         
         // --- 1. OBTENER PRERREQUISITOS de la Asignatura (Usando ApiUcnService) ---
         
-        const malla = await this.apiUcnService.getMallaCurricular(codigoCarrera, catalogo);
+        const malla = await this.ApiUcnService.getMallaCurricular(codigoCarrera, catalogo);
 
         const asignaturaAInscribir = malla.find(curso => curso.codigo === codigoAsignatura);
 

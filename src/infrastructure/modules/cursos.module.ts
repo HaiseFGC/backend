@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { CursosService } from '../../application/services/cursos.service';
 import { CursosController } from '../controllers/cursos.controller';
 import { ApiUcnService } from '../../application/services/apiucn.service'; // 1. Importar el nuevo servicio
@@ -6,6 +7,8 @@ import { ApiUcnService } from '../../application/services/apiucn.service'; // 1.
 @Module({
   // 2. Registrar CursosService y ApiUcnService como proveedores
   // Esto permite que CursosService pueda inyectar ApiUcnService.
+  imports: [ConfigModule],
+
   providers: [CursosService, ApiUcnService], 
   
   controllers: [CursosController],
