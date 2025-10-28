@@ -20,4 +20,30 @@ export class EstudianteController {
   ) {
     return this.estudiantesService.getAvance(rut, carrera);
   }
+
+
+  @Get('proyeccion-data/:rut/:codCarrera/:catalogo')
+  async getProyeccionData(
+    @Param('rut') rut: string,
+    @Param('codCarrera') codCarrera: string,
+    @Param('catalogo') catalogo: string,
+  ) {
+    const malla = await this.estudiantesService.getMalla(codCarrera, catalogo);
+    const avance = await this.estudiantesService.getAvance(rut, codCarrera);
+
+    const aprobados = new Set(
+      avance.filter(a => a.status === 'APROBADO').map(a => a.course)
+    );
+
+    const ramosLiberados = malla.filter(ramo => {
+      if (!ramo.prereq) return true;
+      const prereqs = ramo.prereq.split(',');
+      return prereqs.every(p => aprobados.has(p));
+    })
+
+    return { malla, avance, ramosLiberados };
+  }
+  
+
+
 }
