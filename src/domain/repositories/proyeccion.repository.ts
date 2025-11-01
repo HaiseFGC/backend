@@ -1,37 +1,50 @@
-import { DataSource, Repository } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { Proyeccion } from '../entities/proyeccion.entity';
-import { CreateProyeccionDto } from '../../application/dto/create-proyeccion.dto';
 import { ProyeccionRamo } from '../entities/proyeccion-ramo.entity';
+import { CreateProyeccionDto } from '../../application/dto/create-proyeccion.dto';
 
-export class ProyeccionRepository extends Repository<Proyeccion> {
-    constructor(private dataSource: DataSource) {
-        super(Proyeccion, dataSource.createEntityManager());
-    }
+@Injectable()
+export class ProyeccionRepository {
+  constructor(private dataSource: DataSource) {}
 
-    async createProyeccion(dto: CreateProyeccionDto): Promise<Proyeccion> {
-        const newProyeccion = this.create({
-        rut: dto.rut,
-        nombre: dto.nombre,
-        ramos: dto.ramos.map(r => this.dataSource.getRepository(ProyeccionRamo).create(r)),
-        });
-        return this.save(newProyeccion);
+  async createProyeccion(dto: CreateProyeccionDto): Promise<Proyeccion> {
+    const proyeccionRepo = this.dataSource.getRepository(Proyeccion);
+    const ramoRepo = this.dataSource.getRepository(ProyeccionRamo);
+
+    const ramosEntities = dto.ramos.map(r => ramoRepo.create(r));
+
+    const nuevaProyeccion = proyeccionRepo.create({
+      rut: dto.rut,
+      nombre: dto.nombre,
+      codigoCarrera: dto.codigoCarrera,
+      ramos: ramosEntities,
+    });
+
+    return proyeccionRepo.save(nuevaProyeccion);
   }
 
-    async findById(id: number): Promise<Proyeccion | null> {
-        return this.findOne({
-            where: { id },
-            relations: ['ramos', 'alertas'],
-        })
-    }
-    
-    async findByRut(rut: string): Promise<Proyeccion[]> {
-        return this.find({
-            where: { rut },
-            relations: ['ramos', 'alertas'],
-        });
-    }
+  async findById(id: number): Promise<Proyeccion | null> {
+    const proyeccionRepo = this.dataSource.getRepository(Proyeccion);
+    return proyeccionRepo.findOne({
+      where: { id },
+      relations: ['ramos', 'alertas'],
+    });
+  }
 
-    async deleteById(id: number): Promise<void> {
-        await this.delete(id);
-    }
+  async findByRut(rut: string, codigoCarrera?: string): Promise<Proyeccion[]> {
+    const proyeccionRepo = this.dataSource.getRepository(Proyeccion);
+    const where: any = { rut };
+    if (codigoCarrera) where.codigoCarrera = codigoCarrera;
+
+    return proyeccionRepo.find({
+      where,
+      relations: ['ramos', 'alertas'],
+    });
+  }
+
+  async deleteById(id: number): Promise<void> {
+    const proyeccionRepo = this.dataSource.getRepository(Proyeccion);
+    await proyeccionRepo.delete(id);
+  }
 }

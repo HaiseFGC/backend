@@ -12,9 +12,9 @@ export class ProyeccionController {
         return this.proyeccionService.createProyeccion(createProyeccionDto);
     }
 
-    @Get('usuario/:rut')
-    async findAllByRut(@Param('rut') rut: string) {
-        return this.proyeccionService.findAllByRut(rut);
+    @Get('usuario/:rut/:codigoCarrera')
+    async findAllByRutAndCarrera(@Param('rut') rut: string, @Param('codigoCarrera') codigoCarrera: string) {
+        return this.proyeccionService.findAllByRut(rut, codigoCarrera);
     }
 
     @Get(':id')

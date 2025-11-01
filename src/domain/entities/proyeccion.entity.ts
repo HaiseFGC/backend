@@ -13,6 +13,9 @@ export class Proyeccion {
     @Column()
     nombre: string;
 
+    @Column()
+    codigoCarrera: string;
+
     @Column({ type: 'timestamp', default: () => 'now()' })
     fechaCreacion: Date;
 
