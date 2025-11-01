@@ -11,6 +11,9 @@ export class CreateProyeccionDto {
     @IsNotEmpty()
     nombre: string;
 
+    @IsString()
+    codigoCarrera: string;
+
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => CreateProyeccionRamoDto)
