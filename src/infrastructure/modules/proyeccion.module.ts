@@ -1,14 +1,16 @@
+// src/infrastructure/modules/proyeccion.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Proyeccion } from 'src/domain/entities/proyeccion.entity';
-import { ProyeccionRamo } from 'src/domain/entities/proyeccion-ramo.entity';
-import { Alerta } from 'src/domain/entities/alerta.entity';
-import { ProyeccionService } from 'src/application/services/proyeccion.service';
 import { ProyeccionController } from '../controllers/proyeccion.controller';
+import { ProyeccionService } from 'src/application/services/proyeccion.service';
+import { ProyeccionResolver } from '../resolvers/proyeccion.resolver'; // 1. IMPORTA el resolver
+import { EstudianteModule } from './estudiante.module'; // 2. IMPORTA EstudianteModule para acceder a su servicio
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Proyeccion, ProyeccionRamo, Alerta])],
+  imports: [EstudianteModule], // 3. AÑADE EstudianteModule aquí
   controllers: [ProyeccionController],
-  providers: [ProyeccionService],
+  providers: [
+    ProyeccionService,
+    ProyeccionResolver, // 4. AÑADE el resolver a los providers
+  ],
 })
 export class ProyeccionModule {}

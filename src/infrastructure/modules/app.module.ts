@@ -10,9 +10,22 @@ import { Proyeccion } from 'src/domain/entities/proyeccion.entity';
 import { ProyeccionRamo } from 'src/domain/entities/proyeccion-ramo.entity';
 import { Alerta } from 'src/domain/entities/alerta.entity';
 import { env } from 'process';
+// GraphQLModule
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
+
 
 @Module({
   imports: [
+    // Configuración GraphQLModule
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // Generará un archivo con el esquema
+      sortSchema: true, // Ordena el esquema alfabéticamente
+      playground: true, // Habilita el playground de GraphQL en /graphql
+    }),
+    
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: env.DB_HOST || 'localhost',
@@ -33,7 +46,10 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtAuthMiddleware)
-      .exclude({ path: '/auth/login', method: RequestMethod.POST })
+      .exclude({ path: '/auth/login', method: RequestMethod.POST },
+        // Añadimos una nueva exclusión para la carga inicial del Playground
+        { path: '/graphql', method: RequestMethod.GET } 
+      )
       .forRoutes('*');
   }
 }
