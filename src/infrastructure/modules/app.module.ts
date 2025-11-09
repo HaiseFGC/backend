@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
 import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -12,7 +14,6 @@ import { Proyeccion } from 'src/domain/entities/proyeccion.entity';
 import { ProyeccionRamo } from 'src/domain/entities/proyeccion-ramo.entity';
 import { Alerta } from 'src/domain/entities/alerta.entity';
 import { env } from 'process';
-
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({

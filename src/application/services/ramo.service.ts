@@ -23,11 +23,19 @@ export class RamoService {
     private readonly AVANCE_API = 'https://puclaro.ucn.cl/eross/avance/avance.php';
 
     async obtenerMalla(codigoCarrera: string, catalogo: string): Promise<RamoMalla[]>{
+        console.log('Obteniendo malla para carrera:', codigoCarrera, catalogo);
         try{
             const url = `${this.MALLA_API}?${codigoCarrera}-${catalogo}`;
-            const response = await firstValueFrom(this.httpService.get(url));
+            const headers = { 'X-HAWAII-AUTH': process.env.API_HAWAII_AUTH_TOKEN };
+            const response = await firstValueFrom(this.httpService.get(encodeURI(url), { headers }));
+            if(!response.data || response.data.length === 0){
+                console.warn('No se encontraron ramos en la malla');
+                return [];
+            }
+            console.log('Malla obtenida con', response.data.length, 'ramos');
             return response.data;
         }catch(error){
+            console.log('Error en obtener malla:', error.response?.data || error.message);
             throw new HttpException('Error al obtener malla curricula', HttpStatus.BAD_GATEWAY);
         }
     }
