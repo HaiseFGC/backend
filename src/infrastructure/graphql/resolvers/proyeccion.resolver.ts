@@ -2,10 +2,15 @@ import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { ProyeccionService } from 'src/application/services/proyeccion.service';
 import { Proyeccion } from 'src/domain/entities/proyeccion.entity';
 import { CreateProyeccionDto } from 'src/application/dto/create-proyeccion.dto';
+import { RamoService } from 'src/application/services/ramo.service';
+import { BadRequestException } from '@nestjs/common';
 
 @Resolver(() => Proyeccion)
 export class ProyeccionResolver {
-  constructor(private readonly proyeccionService: ProyeccionService) {}
+  constructor(
+    private readonly proyeccionService: ProyeccionService,
+    private readonly ramoService: RamoService,
+  ) {}
 
   @Query(() => [Proyeccion])
   async proyeccionesPorRut(
@@ -22,6 +27,29 @@ export class ProyeccionResolver {
 
   @Mutation(() => Proyeccion)
   async crearProyeccion(@Args('data') data: CreateProyeccionDto) {
+    const { rut, codigoCarrera, catalogo, ramos } = data;
+    //Ordenar los ramos por semestres antes de validar
+    const ramosOrdenados = [...ramos].sort((a, b) => a.semestre - b.semestre);
+    const ramosTomados: string[] = [];
+
+    for(const ramo of ramosOrdenados){
+      const puedeTomarse = await this.ramoService.puedeTomarse(
+        rut,
+        codigoCarrera,
+        catalogo,
+        ramo.codigoRamo,
+        ramosTomados,
+      );
+
+      if(!puedeTomarse){
+        throw new BadRequestException(
+          'No se puede proyectar ${ramo.codigoRamo} en semestre ${ramo.semestre}: Prerrequisitos no cumplidos'
+        );
+      }
+
+      ramosTomados.push(ramo.codigoRamo);
+    }
+
     return this.proyeccionService.createProyeccion(data);
   }
 

@@ -19,6 +19,10 @@ export class CreateProyeccionDto {
     @IsString()
     codigoCarrera: string;
 
+    @Field()
+    @IsString()
+    catalogo: string;
+
     @Field(() => [CreateProyeccionRamoDto])
     @IsArray()
     @ValidateNested({ each: true })
