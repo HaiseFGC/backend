@@ -1,16 +1,21 @@
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Proyeccion } from './proyeccion.entity';
 
+@ObjectType()
 @Entity('proyeccion_ramos')
 export class ProyeccionRamo {
+    @Field(() => Int)
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Field()
     @Column()
     codigoRamo: string; //Código de la malla oficial
 
+    @Field(() => Int)
     @Column()
-    semestre: number 
+    semestre: number;
 
     @ManyToOne(() => Proyeccion, (proyeccion) => proyeccion.ramos, {
         onDelete: 'CASCADE',
