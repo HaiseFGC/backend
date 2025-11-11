@@ -12,7 +12,16 @@ export class ProyeccionRepository {
     const proyeccionRepo = this.dataSource.getRepository(Proyeccion);
     const ramoRepo = this.dataSource.getRepository(ProyeccionRamo);
 
-    const ramosEntities = dto.ramos.map(r => ramoRepo.create(r));
+    // 🔹 Aplanamos los ramos de todos los periodos, y guardamos el catalogo de cada uno
+    const ramosEntities = dto.periodos.flatMap(periodo =>
+      periodo.ramos.map(ramo =>
+        ramoRepo.create({
+          codigoRamo: ramo.codigoRamo,
+          semestre: ramo.semestre,
+          catalogo: periodo.catalogo, // 🔹 Debes tener esta propiedad en la entidad ProyeccionRamo
+        }),
+      ),
+    );
 
     const nuevaProyeccion = proyeccionRepo.create({
       rut: dto.rut,

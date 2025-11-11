@@ -27,29 +27,35 @@ export class ProyeccionResolver {
 
   @Mutation(() => Proyeccion)
   async crearProyeccion(@Args('data') data: CreateProyeccionDto) {
-    const { rut, codigoCarrera, catalogo, ramos } = data;
-    
-    const ramosOrdenados = [...ramos].sort((a, b) => a.semestre - b.semestre);
+    const { rut, codigoCarrera, periodos } = data;
+
     const ramosTomados: string[] = [];
 
-    for(const ramo of ramosOrdenados){
-      const puedeTomarse = await this.ramoService.puedeTomarse(
-        rut,
-        codigoCarrera,
-        catalogo,
-        ramo.codigoRamo,
-        ramosTomados,
-      );
+    // 🔹 Iterar por cada periodo (antes era un solo catalogo)
+    for (const periodo of periodos) {
+      const { catalogo, ramos } = periodo;
+      const ramosOrdenados = [...ramos].sort((a, b) => a.semestre - b.semestre);
 
-      if(!puedeTomarse){
-        throw new BadRequestException(
-          'No se puede proyectar ${ramo.codigoRamo} en semestre ${ramo.semestre}: Prerrequisitos no cumplidos'
+      for (const ramo of ramosOrdenados) {
+        const puedeTomarse = await this.ramoService.puedeTomarse(
+          rut,
+          codigoCarrera,
+          catalogo,
+          ramo.codigoRamo,
+          ramosTomados,
         );
-      }
 
-      ramosTomados.push(ramo.codigoRamo);
+        if (!puedeTomarse) {
+          throw new BadRequestException(
+            `No se puede proyectar ${ramo.codigoRamo} en semestre ${ramo.semestre}: Prerrequisitos no cumplidos`,
+          );
+        }
+
+        ramosTomados.push(ramo.codigoRamo);
+      }
     }
 
+    // 🔹 Ahora pasamos todos los periodos al servicio
     return this.proyeccionService.createProyeccion(data);
   }
 
