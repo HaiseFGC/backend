@@ -28,7 +28,7 @@ export class ProyeccionResolver {
   @Mutation(() => Proyeccion)
   async crearProyeccion(@Args('data') data: CreateProyeccionDto) {
     const { rut, codigoCarrera, catalogo, ramos } = data;
-    //Ordenar los ramos por semestres antes de validar
+    
     const ramosOrdenados = [...ramos].sort((a, b) => a.semestre - b.semestre);
     const ramosTomados: string[] = [];
 

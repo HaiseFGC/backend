@@ -5,7 +5,7 @@ import { AuthService } from 'src/application/services/auth.service';
 export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
-    @Post('login') // Endpoint para login "http://localhost:3000/auth/login"
+    @Post('login')
     async login(
         @Body('email') email: string,
         @Body('password') password: string

@@ -1,29 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class EstudianteService {
-  constructor(private readonly http: HttpService) {}
+  private readonly MALLA_API = process.env.API_HAWAII_URL;
+  private readonly AVANCE_API = process.env.API_UCN_URL;
+  private readonly AUTH_TOKEN = process.env.API_HAWAII_AUTH_TOKEN;
+
+  constructor(private readonly httpService: HttpService) {}
 
   async getMalla(codigo: string, catalogo: string) {
-    const url = `https://losvilos.ucn.cl/hawaii/api/mallas?${codigo}-${catalogo}`;
-    const headers = { 'X-HAWAII-AUTH': 'jf400fejof13f' };
+    const url = `${this.MALLA_API}?${codigo}-${catalogo}`;
+    const headers = { 'X-HAWAII-AUTH': this.AUTH_TOKEN };
+
     try {
-      const response = await firstValueFrom(this.http.get(url, { headers }));
+      const response = await firstValueFrom(
+        this.httpService.get(url, { headers })
+      );
       return response.data;
-    } catch {
-      return [];
+    } catch (error) {
+      throw new HttpException(
+        'No se pudo obtener la malla curricular',
+        HttpStatus.BAD_GATEWAY,
+      );
     }
   }
 
-  async getAvance(rut: string, carrera: string) {
-    const url = `https://puclaro.ucn.cl/eross/avance/avance.php?rut=${rut}&codcarrera=${carrera}`;
+  async getAvance(rut: string, codigoCarrera: string) {
+    const url = `${this.AVANCE_API}avance.php?rut=${rut}&codcarrera=${codigoCarrera}`;
+
     try {
-      const response = await firstValueFrom(this.http.get(url));
+      const response = await firstValueFrom(this.httpService.get(url));
       return response.data;
-    } catch {
-      return { error: 'Avance no encontrado' };
+    } catch (error) {
+      throw new HttpException(
+        'No se pudo obtener el avance curricular del estudiante',
+        HttpStatus.BAD_GATEWAY,
+      );
     }
   }
 }

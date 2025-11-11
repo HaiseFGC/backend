@@ -11,7 +11,7 @@ export class Alerta {
 
     @Field()
     @Column()
-    descripcion: string; //Descripción de la alerta
+    descripcion: string;
 
     @ManyToOne(() => Proyeccion, (proyeccion) => proyeccion.alertas, {
         onDelete: 'CASCADE',

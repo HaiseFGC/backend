@@ -7,68 +7,66 @@ interface RamoMalla {
   asignatura: string;
   creditos: number;
   nivel: number;
-  prereq: string; // lista separada por comas
+  prereq: string;
 }
 
 interface AvanceRamo {
-  course: string;
-  status: string; // APROBADO o REPROBADO
+  curso: string;
+  estatus: string;
 }
 
 @Injectable()
 export class RamoService {
-    constructor(private readonly httpService: HttpService) {}
+    private readonly MALLA_API = process.env.API_HAWAII_URL;
+    private readonly AVANCE_API = process.env.API_UCN_URL;
+    private readonly AUTH_TOKEN = process.env.API_HAWAII_AUTH_TOKEN;
+  constructor(private readonly httpService: HttpService) {}
 
-    private readonly MALLA_API = 'https://losvilos.ucn.cl/hawaii/api/mallas';
-    private readonly AVANCE_API = 'https://puclaro.ucn.cl/eross/avance/avance.php';
+async obtenerMalla(codigoCarrera: string, catalogo: string) {
+  const url = `${this.MALLA_API}?${codigoCarrera}-${catalogo}`;
+  return (await firstValueFrom(
+    this.httpService.get(url, { headers: { 'X-HAWAII-AUTH': this.AUTH_TOKEN } })
+  )).data;
+}
 
-    async obtenerMalla(codigoCarrera: string, catalogo: string): Promise<RamoMalla[]>{
-        console.log('Obteniendo malla para carrera:', codigoCarrera, catalogo);
-        try{
-            const url = `${this.MALLA_API}?${codigoCarrera}-${catalogo}`;
-            const headers = { 'X-HAWAII-AUTH': process.env.API_HAWAII_AUTH_TOKEN };
-            const response = await firstValueFrom(this.httpService.get(encodeURI(url), { headers }));
-            if(!response.data || response.data.length === 0){
-                console.warn('No se encontraron ramos en la malla');
-                return [];
-            }
-            console.log('Malla obtenida con', response.data.length, 'ramos');
-            return response.data;
-        }catch(error){
-            console.log('Error en obtener malla:', error.response?.data || error.message);
-            throw new HttpException('Error al obtener malla curricula', HttpStatus.BAD_GATEWAY);
-        }
-    }
+async obtenerAvance(rut: string, codigoCarrera: string) {
+  const url = `${this.AVANCE_API}avance.php?rut=${rut}&codcarrera=${codigoCarrera}`;
+  return (await firstValueFrom(this.httpService.get(url))).data;
+}
 
-    async obtenerAvance(rut: string, codigoCarrera: string): Promise<AvanceRamo[]>{
-        try{
-            const url = `${this.AVANCE_API}?rut=${rut}&codcarrera=${codigoCarrera}`;
-            const response = await firstValueFrom(this.httpService.get(url));
-            return response.data;
-        }catch(error){
-            throw new HttpException('Error al obtener avance curricular del estudiante', HttpStatus.BAD_GATEWAY);
-        }
-    }
+  async obtenerPrerrequisitos(
+    codigoRamo: string,
+    codigoCarrera: string,
+    catalogo: string,
+  ): Promise<string[]> {
+    const malla = await this.obtenerMalla(codigoCarrera, catalogo);
+    const ramo = malla.find((r) => r.codigo === codigoRamo);
 
-    async obtenerPrerrequisitos(codigoRamo: string, codigoCarrera: string, catalogo: string): Promise<string[]>{
-        const malla = await this.obtenerMalla(codigoCarrera, catalogo);
-        const ramo = malla.find((r) => r.codigo === codigoRamo);
-        if(!ramo) return [];
-        if(!ramo.prereq) return [];
-        return ramo.prereq.split(',').map((p) => p.trim());
-    }
+    if (!ramo || !ramo.prereq) return [];
+    return ramo.prereq.split(',').map((p) => p.trim());
+  }
 
-    async puedeTomarse(rut: string, codigoCarrera: string, catalogo: string, codigoRamo: string, ramosPrevios: string[]): Promise<boolean>{
-        const prerrequisitos = await this.obtenerPrerrequisitos(codigoRamo, codigoCarrera, catalogo);
-        if(prerrequisitos.length === 0) return true; //Si no hay prerrequisitos
+  async puedeTomarse(
+    rut: string,
+    codigoCarrera: string,
+    catalogo: string,
+    codigoRamo: string,
+    ramosPrevios: string[],
+  ): Promise<boolean> {
+    const prerrequisitos = await this.obtenerPrerrequisitos(
+      codigoRamo,
+      codigoCarrera,
+      catalogo,
+    );
 
-        const avance = await this.obtenerAvance(rut, codigoCarrera);
-        const aprobados = avance
-            .filter((r) => r.status === 'APROBADO')
-            .map((r) => r.course);
-        
-        const ramosCumplidos = [...aprobados, ...ramosPrevios];
+    if (prerrequisitos.length === 0) return true;
 
-        return prerrequisitos.every((req) => ramosCumplidos.includes(req));
-    }
+    const avance = await this.obtenerAvance(rut, codigoCarrera);
+    const aprobados = avance
+      .filter((r) => r.estatus === 'APROBADO')
+      .map((r) => r.curso);
+
+    const ramosCumplidos = [...aprobados, ...ramosPrevios];
+    return prerrequisitos.every((req) => ramosCumplidos.includes(req));
+  }
 }

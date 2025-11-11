@@ -1,44 +1,74 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { ApiUcnConfig } from "src/infrastructure/config/apiucn.config";
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private readonly httpService: HttpService,
-        private readonly jwtService: JwtService
-    ) {}
+  private readonly logger = new Logger(AuthService.name);
+  private readonly apiUcnUrl: string;
 
-    async login(email: string, password: string) {
-        const url = `${ApiUcnConfig}login.php?email=${email}&password=${password}`;
-        
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {
+    this.apiUcnUrl =
+      this.configService.get<string>('API_UCN_URL') ??
+      'https://puclaro.ucn.cl/eross/avance/';
+  }
 
-        try {
-            const response = await firstValueFrom(
-                this.httpService.get(url, { validateStatus: () => true })
-            );
-            const data = response.data;
+  async login(email: string, password: string) {
+    const encodedEmail = encodeURIComponent(email);
+    const encodedPassword = encodeURIComponent(password);
+    const url = `${this.apiUcnUrl}login.php?email=${encodedEmail}&password=${encodedPassword}`;
 
-            if (!data || !data.rut) {
-                console.error('Invalid credentials or missing RUT', data);
-                throw new UnauthorizedException('Invalid credentials');
-            }
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(url, { validateStatus: () => true }),
+      );
 
-            console.log(`User authenticated: ${JSON.stringify(data)}`);
+      const { data, status } = response;
 
-            // Genera token solo con el RUT, puedes incluir más campos si quieres
-            const payload = { rut: data.rut };
-            const token = await this.jwtService.signAsync(payload, { expiresIn: '1h' });
+      
+      if (status !== 200 || !data?.rut) {
+        this.logger.warn('Invalid credentials or missing RUT', {
+          status,
+          data,
+        });
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-            return { 
-                rut: data.rut,
-                carreras: data.carreras || [],
-                access_token: token };
-        } catch (error) {
-            console.error('ERROR EN EL CATCH');
-            throw new UnauthorizedException('Error during authentication');
-        }
+      this.logger.log(`Usuario autenticado: ${data.rut}`);
+
+     
+      const payload = { rut: data.rut };
+
+      
+      const token = await this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') || '1h',
+      });
+
+      return {
+        rut: data.rut,
+        carreras: data.carreras ?? [],
+        access_token: token,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+
+      this.logger.error(
+        'Error durante la autenticación',
+        error?.stack ?? error,
+      );
+      throw new InternalServerErrorException('Error during authentication');
     }
+  }
 }

@@ -15,7 +15,7 @@ export class AlertaRepository extends Repository<Alerta> {
     async createAlerta(proyeccionId: number, descripcion: string): Promise<Alerta> {
         const newAlerta = this.create({
             descripcion,
-            proyeccion: { id: proyeccionId } as any, // Usamos 'as any' para evitar problemas de tipado
+            proyeccion: { id: proyeccionId } as any,
         });
         return this.save(newAlerta);
     }

@@ -11,7 +11,7 @@ export class ProyeccionRamo {
 
     @Field()
     @Column()
-    codigoRamo: string; //Código de la malla oficial
+    codigoRamo: string;
 
     @Field(() => Int)
     @Column()

@@ -12,7 +12,7 @@ export class Proyeccion {
 
     @Field()
     @Column()
-    rut: string; //Estudiante al que pertenece la proyeccion (Rut desde la API)
+    rut: string;
 
     @Field()
     @Column()

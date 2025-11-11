@@ -5,7 +5,7 @@ import { EstudianteService } from 'src/application/services/estudiante.service';
 export class EstudianteController {
   constructor(private readonly estudiantesService: EstudianteService) {}
   
-  @Get('malla/:codigo/:catalogo') //MODIFICAR O ARREGLARLOS PARA EL NUEVO SPRINT
+  @Get('malla/:codigo/:catalogo')
   async getMalla(
     @Param('codigo') codigo: string,
     @Param('catalogo') catalogo: string,
@@ -13,7 +13,7 @@ export class EstudianteController {
     return this.estudiantesService.getMalla(codigo, catalogo);
   }
 
-  @Get('avance/:rut/:carrera') //MODIFICAR O ARREGLARLOS PARA EL NUEVO SPRINT
+  @Get('avance/:rut/:carrera')
   async getAvance(
     @Param('rut') rut: string,
     @Param('carrera') carrera: string,

@@ -1,9 +1,12 @@
 import { Injectable, NestMiddleware, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtAuthMiddleware implements NestMiddleware {
+    constructor(private config: ConfigService) {}
+
     use(req: Request, res: Response, next: NextFunction) {
 
         const authHeader = req.headers['authorization'];
@@ -17,7 +20,11 @@ export class JwtAuthMiddleware implements NestMiddleware {
         }
 
         try {
-            const decoded = jwt.verify(token, 'secretKey'); // Despues pasar a un env variable
+            const jwtSecret = this.config.get('JWT_SECRET');
+            if (!jwtSecret) {
+                throw new Error('JWT_SECRET is not defined in the configuration');
+            }
+            const decoded = jwt.verify(token, jwtSecret);
             (req as any).user = decoded;
             next();
         } catch (err) {

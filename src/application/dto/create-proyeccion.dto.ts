@@ -8,7 +8,7 @@ export class CreateProyeccionDto {
     @Field()
     @IsString()
     @IsNotEmpty()
-    rut: string; //Rut del estudiante al que pertenece la proyeccion
+    rut: string;
 
     @Field()
     @IsString()

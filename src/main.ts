@@ -2,15 +2,15 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './infrastructure/modules/app.module';
-import { EstudianteModule } from './infrastructure/modules/estudiante.module';
-import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-   // habilita CORS para que el frontend pueda llamar al backend
+  const config = app.get(ConfigService);
   app.enableCors({
-    origin: 'http://localhost:5173', // puerto donde corre tu frontend (Vite/React)
+    origin: config.get('FRONTEND_URL'),
     credentials: true,
   });
   await app.listen(3000);
