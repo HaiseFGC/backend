@@ -32,6 +32,7 @@ export class EstudianteService {
 
     try {
       const response = await firstValueFrom(this.httpService.get(url));
+      
       return response.data;
     } catch (error) {
       throw new HttpException(
@@ -40,4 +41,34 @@ export class EstudianteService {
       );
     }
   }
+
+async getHistorial(rut: string, codigoCarrera: string, catalogo: string) {
+  const avance = await this.getAvance(rut, codigoCarrera);
+
+  if (!Array.isArray(avance)) {
+    throw new HttpException('Avance no encontrado', HttpStatus.NOT_FOUND);
+  }
+
+  // Ordenar los registros por período (numéricamente, más antiguo primero)
+  const sorted = [...avance].sort((a, b) => Number(a.period) - Number(b.period));
+
+  // Agrupar por período
+  const grouped = sorted.reduce((acc, item) => {
+    if (!acc[item.period]) acc[item.period] = [];
+    acc[item.period].push({
+      nrc: item.nrc,
+      codigo: item.course,
+      estado: item.status,
+      excluido: item.excluded,
+      tipo: item.inscriptionType
+    });
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  return grouped;
+}
+
+
+
+
 }

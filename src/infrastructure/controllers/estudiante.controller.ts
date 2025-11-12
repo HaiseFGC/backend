@@ -21,7 +21,6 @@ export class EstudianteController {
     return this.estudiantesService.getAvance(rut, carrera);
   }
 
-
   @Get('proyeccion-data/:rut/:codCarrera/:catalogo')
   async getProyeccionData(
     @Param('rut') rut: string,
@@ -44,6 +43,14 @@ export class EstudianteController {
     return { malla, avance, ramosLiberados };
   }
   
+  @Get('historial/:rut/:codCarrera/:catalogo')
+  async getHistorial(
+    @Param('rut') rut: string,
+    @Param('codCarrera') codCarrera: string,
+    @Param('catalogo') catalogo: string,
+  ) {
+    return this.estudiantesService.getHistorial(rut, codCarrera, catalogo);
+}
 
 
 }
