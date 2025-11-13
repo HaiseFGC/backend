@@ -8,9 +8,14 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: ucn_database
     ports:
-      - "5432:5432"
+      - "5434:5432"   # 👈 Cambiado para evitar conflicto con otros Postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_ucn_data:/var/lib/postgresql/data
+    networks:
+      - ucn_net
 
 volumes:
-  postgres_data:
+  postgres_ucn_data:
+
+networks:
+  ucn_net:
