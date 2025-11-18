@@ -26,42 +26,46 @@ export class ProyeccionResolver {
   }
 
   @Mutation(() => Proyeccion)
-  async crearProyeccion(@Args('data') data: CreateProyeccionDto) {
+  async crearProyeccion(
+    @Args('data') data: CreateProyeccionDto
+  ) {
     const { rut, codigoCarrera, periodos } = data;
 
     const ramosTomados: string[] = [];
 
-    // 🔹 Iterar por cada periodo (antes era un solo catalogo)
-    for (const periodo of periodos) {
-      const { catalogo, ramos } = periodo;
-      const ramosOrdenados = [...ramos].sort((a, b) => a.semestre - b.semestre);
+  for (const periodo of periodos) {
+    const { catalogo, ramos } = periodo;
 
-      for (const ramo of ramosOrdenados) {
-        const puedeTomarse = await this.ramoService.puedeTomarse(
-          rut,
-          codigoCarrera,
-          catalogo,
-          ramo.codigoRamo,
-          ramosTomados,
+    const ramosOrdenados = [...ramos].sort((a, b) => a.semestre - b.semestre);
+
+    for (const ramo of ramosOrdenados) {
+      const puedeTomarse = await this.ramoService.puedeTomarse(
+        rut,
+        codigoCarrera,
+        catalogo,
+        ramo.codigoRamo,
+        ramosTomados,
+      );
+
+      if (!puedeTomarse) {
+        throw new BadRequestException(
+          `No se puede proyectar ${ramo.codigoRamo} en semestre ${ramo.semestre}: Prerrequisitos no cumplidos`,
         );
-
-        if (!puedeTomarse) {
-          throw new BadRequestException(
-            `No se puede proyectar ${ramo.codigoRamo} en semestre ${ramo.semestre}: Prerrequisitos no cumplidos`,
-          );
-        }
-
-        ramosTomados.push(ramo.codigoRamo);
       }
-    }
 
-    // 🔹 Ahora pasamos todos los periodos al servicio
-    return this.proyeccionService.createProyeccion(data);
+      ramosTomados.push(ramo.codigoRamo);
+    }
   }
+
+  return this.proyeccionService.createProyeccion(data);
+}
+
 
   @Mutation(() => String)
   async eliminarProyeccion(@Args('id', { type: () => Int }) id: number) {
     await this.proyeccionService.deleteProyeccion(id);
     return 'Proyección eliminada exitosamente';
   }
+  
 }
+  
