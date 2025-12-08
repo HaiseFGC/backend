@@ -8,10 +8,12 @@ import { ProyeccionService } from 'src/application/services/proyeccion.service';
 import { ProyeccionController } from '../controllers/proyeccion.controller';
 import { ProyeccionResolver } from '../graphql/resolvers/proyeccion.resolver';
 import { RamoService } from 'src/application/services/ramo.service';
+import { EstudianteModule } from './estudiante.module';
 
 
 @Module({
-  imports: [HttpModule, TypeOrmModule.forFeature([Proyeccion, ProyeccionRamo, Alerta])],
+  imports: [HttpModule, TypeOrmModule.forFeature([Proyeccion, ProyeccionRamo, Alerta]),
+    EstudianteModule,],
   controllers: [ProyeccionController],
   providers: [ProyeccionService, ProyeccionResolver, RamoService],
 })
