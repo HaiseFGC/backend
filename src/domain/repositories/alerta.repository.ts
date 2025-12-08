@@ -1,32 +1,32 @@
+import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Alerta } from '../entities/alerta.entity';
+// Importa tu DTO si lo usas, o define los tipos necesarios
 
-export class AlertaRepository extends Repository<Alerta> {
-    constructor(private dataSource: DataSource) {
-        super(Alerta, dataSource.createEntityManager());
-    }
+@Injectable()
+export class AlertaRepository {
+  private repo: Repository<Alerta>;
 
-    async findByProyeccionId(proyeccionId: number): Promise<Alerta[]> {
-        return this.find({
-            where: { proyeccion: { id: proyeccionId } },
-        });
-    }
+  constructor(private dataSource: DataSource) {
+    // Inicializamos el repositorio interno
+    this.repo = this.dataSource.getRepository(Alerta);
+  }
 
-    async createAlerta(proyeccionId: number, descripcion: string): Promise<Alerta> {
-        const newAlerta = this.create({
-            descripcion,
-            proyeccion: { id: proyeccionId } as any,
-        });
-        return this.save(newAlerta);
-    }
+  // Método personalizado para crear alertas
+  async createAlerta(proyeccionId: number, descripcion: string): Promise<Alerta> {
+    const nuevaAlerta = this.repo.create({
+      descripcion,
+      proyeccion: { id: proyeccionId } as any, // Vinculación simple por ID
+      fecha: new Date(),
+    });
+    return this.repo.save(nuevaAlerta);
+  }
 
-    async deleteByProyeccionId(proyeccionId: number): Promise<void> {
-        await this.createQueryBuilder()
-            .delete()
-            .from(Alerta)
-            .where("proyeccionId = :proyeccionId", { proyeccionId })
-            .execute();
-    }
-    
-
+  // Ejemplo de otro método si lo necesitaras
+  async findByProyeccionId(proyeccionId: number): Promise<Alerta[]> {
+    return this.repo.find({
+      where: { proyeccion: { id: proyeccionId } },
+      order: { fecha: 'DESC' }
+    });
+  }
 }

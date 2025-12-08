@@ -1,5 +1,5 @@
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from "typeorm";
 import { Proyeccion } from "./proyeccion.entity";
 
 @ObjectType()
@@ -12,6 +12,12 @@ export class Alerta {
     @Field()
     @Column()
     descripcion: string;
+
+    // --- NUEVO CAMPO AGREGADO ---
+    @Field()
+    @CreateDateColumn() // La BD asignará la fecha actual automáticamente al crear
+    fecha: Date;
+    // ----------------------------
 
     @ManyToOne(() => Proyeccion, (proyeccion) => proyeccion.alertas, {
         onDelete: 'CASCADE',
