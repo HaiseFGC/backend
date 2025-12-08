@@ -4,12 +4,14 @@ import { Proyeccion } from 'src/domain/entities/proyeccion.entity';
 import { CreateProyeccionDto } from 'src/application/dto/create-proyeccion.dto';
 import { RamoService } from 'src/application/services/ramo.service';
 import { BadRequestException } from '@nestjs/common';
+import { ProyeccionAutomaticaResponse } from 'src/application/dto/proyeccion-automatica.response';
 
 @Resolver(() => Proyeccion)
 export class ProyeccionResolver {
   constructor(
     private readonly proyeccionService: ProyeccionService,
     private readonly ramoService: RamoService,
+
   ) {}
 
   @Query(() => [Proyeccion])
@@ -23,6 +25,15 @@ export class ProyeccionResolver {
   @Query(() => Proyeccion, { nullable: true })
   async proyeccion(@Args('id', { type: () => Int }) id: number) {
     return this.proyeccionService.findOne(id);
+  }
+
+  @Query(() => ProyeccionAutomaticaResponse, { name: 'previsualizarProyeccion' })
+  async previsualizarProyeccion(
+    @Args('rut', { type: () => String }) rut: string,
+    @Args('codigoCarrera', { type: () => String }) codigoCarrera: string,
+    @Args('catalogo', { type: () => String }) catalogo: string,
+  ) {
+    return this.proyeccionService.simularProyeccionAutomatica(rut, codigoCarrera, catalogo);
   }
 
   @Mutation(() => Proyeccion)
@@ -67,5 +78,21 @@ export class ProyeccionResolver {
     return 'Proyección eliminada exitosamente';
   }
   
+
+
+  @Mutation(() => Proyeccion)
+  async guardarProyeccionAutomatica(
+    @Args('rut', { type: () => String }) rut: string,
+    @Args('codigoCarrera', { type: () => String }) codigoCarrera: string,
+    @Args('catalogo', { type: () => String }) catalogo: string,
+    @Args('nombre', { type: () => String, nullable: true }) nombre?: string,
+  ) {
+    return this.proyeccionService.generarYGuardarProyeccionAutomatica(
+      rut, 
+      codigoCarrera, 
+      catalogo,
+      nombre
+    );
+  }
 }
   

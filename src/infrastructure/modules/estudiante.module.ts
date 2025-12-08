@@ -7,5 +7,6 @@ import { EstudianteService } from 'src/application/services/estudiante.service';
     imports: [HttpModule],
     controllers: [EstudianteController],
     providers: [EstudianteService],
+    exports: [EstudianteService],
 })
 export class EstudianteModule {}

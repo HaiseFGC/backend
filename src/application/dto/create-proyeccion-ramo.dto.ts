@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsInt, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsInt, Min, IsOptional } from 'class-validator';
 import { InputType, Field, Int } from '@nestjs/graphql';
 
 @InputType()
@@ -7,6 +7,13 @@ export class CreateProyeccionRamoDto {
     @IsString()
     @IsNotEmpty()
     codigoRamo: string; 
+
+    // --- NUEVO CAMPO AGREGADO ---
+    @Field({ nullable: true })
+    @IsString()
+    @IsOptional()
+    nombreAsignatura?: string;
+    // ----------------------------
 
     @Field(() => Int)
     @IsInt()

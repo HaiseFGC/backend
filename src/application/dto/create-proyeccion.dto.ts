@@ -1,9 +1,17 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
+import { IsOptional, IsString } from 'class-validator';
 
 @InputType()
 export class RamoPeriodoInput {
   @Field()
   codigoRamo: string;
+
+  // --- NUEVO CAMPO AGREGADO ---
+  @Field({ nullable: true })
+  @IsString()
+  @IsOptional()
+  nombreAsignatura?: string;
+  // ----------------------------
 
   @Field(() => Int)
   semestre: number;

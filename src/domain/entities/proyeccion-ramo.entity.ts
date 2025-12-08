@@ -2,7 +2,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { Proyeccion } from './proyeccion.entity';
 
-@ObjectType() // ✅ Exponer como tipo GraphQL
+@ObjectType()
 @Entity('proyeccion_ramos')
 export class ProyeccionRamo {
   @Field(() => Int)
@@ -13,13 +13,19 @@ export class ProyeccionRamo {
   @Column()
   codigoRamo: string;
 
+  // --- NUEVO CAMPO AGREGADO ---
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  nombreAsignatura: string;
+  // ----------------------------
+
   @Field(() => Int)
   @Column()
   semestre: number;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  catalogo?: string; // 🔹 Permite exponer el periodo académico
+  catalogo?: string;
 
   @ManyToOne(() => Proyeccion, (proyeccion) => proyeccion.ramos, {
     onDelete: 'CASCADE',
