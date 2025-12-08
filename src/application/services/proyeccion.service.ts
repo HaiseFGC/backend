@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
-import { ProyeccionRepository } from 'src/domain/repositories/proyeccion.repository';
-import { AlertaRepository } from 'src/domain/repositories/alerta.repository';
+import { ProyeccionRepository } from '../../domain/repositories/proyeccion.repository';
+import { AlertaRepository } from '../../domain/repositories/alerta.repository';
 import { CreateProyeccionDto } from '../dto/create-proyeccion.dto';
 import { 
   ProyeccionAutomaticaResponse, 
@@ -13,19 +12,15 @@ import { RamoService } from './ramo.service';
 
 @Injectable()
 export class ProyeccionService {
-  private proyeccionRepo: ProyeccionRepository;
-  private alertaRepo: AlertaRepository;
-  
   private readonly MAX_CREDITOS = 30;
 
   constructor(
-    private dataSource: DataSource,
+    // CAMBIO: Inyectamos los repositorios en lugar de crearlos manualmente
+    private readonly proyeccionRepo: ProyeccionRepository,
+    private readonly alertaRepo: AlertaRepository,
     private readonly estudianteService: EstudianteService,
     private readonly ramoService: RamoService,
-  ) {
-    this.proyeccionRepo = new ProyeccionRepository(dataSource);
-    this.alertaRepo = new AlertaRepository(dataSource);
-  }
+  ) {}
 
   // --- MÉTODOS EXISTENTES ---
 
@@ -179,7 +174,6 @@ export class ProyeccionService {
   ) {
     const simulacion = await this.simularProyeccionAutomatica(rut, codigoCarrera, catalogo);
 
-    // Array tipado para evitar error 'never'
     const ramosParaGuardar: { codigoRamo: string; nombreAsignatura: string; semestre: number }[] = [];
 
     simulacion.semestres.forEach(semestre => {

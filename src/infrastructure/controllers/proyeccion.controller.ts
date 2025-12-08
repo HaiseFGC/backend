@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
-import { ProyeccionService } from 'src/application/services/proyeccion.service';
-import { CreateProyeccionDto } from 'src/application/dto/create-proyeccion.dto';
+import { ProyeccionService } from '../../application/services/proyeccion.service';
+import { CreateProyeccionDto } from '../../application/dto/create-proyeccion.dto';
 
 @Controller('proyecciones')
 export class ProyeccionController {
