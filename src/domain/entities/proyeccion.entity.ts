@@ -34,7 +34,7 @@ export class Proyeccion {
   @OneToMany(() => Alerta, (alerta) => alerta.proyeccion, { cascade: true })
   alertas: Alerta[];
 
-  // 🔹 Getter computado que agrupa los ramos por catálogo
+ 
   @Field(() => [PeriodoProyeccionGraphQL], { nullable: true })
   get periodos(): PeriodoProyeccionGraphQL[] {
     if (!this.ramos || this.ramos.length === 0) return [];
@@ -42,7 +42,7 @@ export class Proyeccion {
     const agrupado = new Map<string, { catalogo: string; ramos: RamoPeriodoGraphQL[] }>();
 
     for (const ramo of this.ramos) {
-      const catalogo = ramo.catalogo ?? 'desconocido'; // ✅ Valor por defecto seguro
+      const catalogo = ramo.catalogo ?? 'desconocido'; 
 
       if (!agrupado.has(catalogo)) {
         agrupado.set(catalogo, {

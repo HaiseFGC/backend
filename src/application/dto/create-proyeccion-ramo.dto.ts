@@ -8,13 +8,11 @@ export class CreateProyeccionRamoDto {
     @IsNotEmpty()
     codigoRamo: string; 
 
-    // --- NUEVO CAMPO AGREGADO ---
     @Field({ nullable: true })
     @IsString()
     @IsOptional()
     nombreAsignatura?: string;
-    // ----------------------------
-
+    
     @Field(() => Int)
     @IsInt()
     @Min(1)

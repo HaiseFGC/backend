@@ -13,11 +13,10 @@ export class Alerta {
     @Column()
     descripcion: string;
 
-    // --- NUEVO CAMPO AGREGADO ---
+
     @Field()
-    @CreateDateColumn() // La BD asignará la fecha actual automáticamente al crear
+    @CreateDateColumn()
     fecha: Date;
-    // ----------------------------
 
     @ManyToOne(() => Proyeccion, (proyeccion) => proyeccion.alertas, {
         onDelete: 'CASCADE',

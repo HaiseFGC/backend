@@ -13,11 +13,9 @@ export class ProyeccionRamo {
   @Column()
   codigoRamo: string;
 
-  // --- NUEVO CAMPO AGREGADO ---
   @Field({ nullable: true })
   @Column({ nullable: true })
   nombreAsignatura: string;
-  // ----------------------------
 
   @Field(() => Int)
   @Column()
