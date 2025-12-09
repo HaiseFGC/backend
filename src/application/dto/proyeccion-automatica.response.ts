@@ -15,10 +15,10 @@ export class RamoProyectadoGraphQL {
 @ObjectType()
 export class SemestreProyeccionGraphQL {
   @Field()
-  periodo: string; // Ej: "202610"
+  periodo: string; 
 
   @Field(() => Int)
-  semestreRelativo: number; // 1, 2, 3...
+  semestreRelativo: number;
 
   @Field(() => Int)
   totalCreditos: number;

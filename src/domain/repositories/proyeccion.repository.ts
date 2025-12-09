@@ -12,14 +12,11 @@ export class ProyeccionRepository {
     const proyeccionRepo = this.dataSource.getRepository(Proyeccion);
     const ramoRepo = this.dataSource.getRepository(ProyeccionRamo);
 
-    // Aplanamos los ramos de todos los periodos
     const ramosEntities = dto.periodos.flatMap(periodo =>
       periodo.ramos.map(ramo =>
         ramoRepo.create({
           codigoRamo: ramo.codigoRamo,
-          // --- AQUÍ ASIGNAMOS EL NOMBRE ---
           nombreAsignatura: ramo.nombreAsignatura, 
-          // --------------------------------
           semestre: ramo.semestre,
           catalogo: periodo.catalogo, 
         }),
@@ -52,7 +49,7 @@ export class ProyeccionRepository {
     return proyeccionRepo.find({
       where,
       relations: ['ramos', 'alertas'],
-      order: { fechaCreacion: 'DESC' } // Opcional: ordenar por fecha
+      order: { fechaCreacion: 'DESC' }
     });
   }
 

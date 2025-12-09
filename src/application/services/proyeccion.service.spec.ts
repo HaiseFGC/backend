@@ -97,7 +97,7 @@ describe('ProyeccionService', () => {
       ];
 
       mockRamoService.obtenerMalla.mockResolvedValue(mockMalla);
-      mockEstudianteService.getAvance.mockResolvedValue([]); // Alumno nuevo
+      mockEstudianteService.getAvance.mockResolvedValue([]); 
 
       const resultado = await service.simularProyeccionAutomatica(rut, 'ICCI', '2018');
 
@@ -105,8 +105,7 @@ describe('ProyeccionService', () => {
       // Semestre 1: Solo cabe 'A' (20 cr). 'B' (15 cr) no cabe porque 20+15=35 > 30.
       // Semestre 2: Toma 'B' (que quedó pendiente) y 'C' (que se desbloqueó al aprobar A).
       
-      expect(resultado.semestres).toHaveLength(2); // Debería tomar 2 semestres
-      
+      expect(resultado.semestres).toHaveLength(2); 
       // Semestre 1
       expect(resultado.semestres[0].totalCreditos).toBe(20);
       expect(resultado.semestres[0].asignaturas[0].codigoRamo).toBe('A');
