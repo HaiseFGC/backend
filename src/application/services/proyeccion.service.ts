@@ -68,6 +68,7 @@ export class ProyeccionService {
     let ultimoPeriodoRegistrado = 0;
 
     avance.forEach((registro: any) => {
+      // OJO: Aseguramos que 'INSCRITO' también cuente para avanzar el reloj
       if (registro.status === 'APROBADO' || registro.status === 'INSCRITO') {
         aprobadosSet.add(registro.course);
       }
@@ -78,26 +79,35 @@ export class ProyeccionService {
       }
     });
 
-    // 3. CALCULAR PERIODO INICIAL
-    let currentYear: number;
-    let currentSem: number; 
-
-    if (ultimoPeriodoRegistrado === 0) {
-      const today = new Date();
-      currentYear = today.getFullYear();
-      currentSem = today.getMonth() < 6 ? 10 : 20; 
-    } else {
+    // --- CORRECCIÓN AQUÍ ----------------------------------------------
+    // 3. CALCULAR PERIODO INICIAL (Lógica de Sincronización)
+    
+    // A. Calculamos cuál sería el siguiente periodo según su historial
+    let siguientePeriodoHistorial = 0;
+    if (ultimoPeriodoRegistrado > 0) {
       const year = Math.floor(ultimoPeriodoRegistrado / 100);
       const sem = ultimoPeriodoRegistrado % 100;
-      
-      if (sem === 20) {
-        currentYear = year + 1;
-        currentSem = 10;
-      } else {
-        currentYear = year;
-        currentSem = 20;
-      }
+      // Si terminó el semestre 20 (o verano 25), toca el 10 del prox año. Si no, el 20 del mismo.
+      siguientePeriodoHistorial = (sem === 20 || sem === 25) ? (year + 1) * 100 + 10 : year * 100 + 20;
     }
+
+    // B. Calculamos el periodo actual real basado en la fecha de hoy
+    const today = new Date();
+    const realYear = today.getFullYear();
+    const realMonth = today.getMonth(); // 0 = Enero, 11 = Diciembre
+    // Regla simple: Enero a Julio (mes < 7) asume Semestre 1 (10), resto Semestre 2 (20)
+    // Ajusta esto según las reglas de negocio de la UCN si es necesario (ej: Marzo corte)
+    const realSem = realMonth < 7 ? 10 : 20; 
+    const periodoActualReal = (realYear * 100) + realSem;
+
+    // C. El periodo de inicio será EL MAYOR de los dos.
+    // Esto arregla el bug: Si el alumno no tiene ramos inscritos hoy (su historial es viejo),
+    // forzamos que la proyección empiece "Ahora" y no en el pasado.
+    const periodoInicio = Math.max(siguientePeriodoHistorial, periodoActualReal);
+
+    let currentYear = Math.floor(periodoInicio / 100);
+    let currentSem = periodoInicio % 100;
+    // ------------------------------------------------------------------
 
     let pendientes = malla.filter((ramo: any) => !aprobadosSet.has(ramo.codigo));
 
